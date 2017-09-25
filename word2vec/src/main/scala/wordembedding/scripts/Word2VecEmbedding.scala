@@ -2,7 +2,7 @@ package wordembedding.scripts
 
 import java.io.{File, FileWriter}
 
-import wordembedding.util.{CSVParser, Loggable}
+import wordembedding.util.{CSVPreprocessor, Loggable}
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
 import org.deeplearning4j.models.word2vec.Word2Vec
 import org.deeplearning4j.text.sentenceiterator.{BasicLineIterator, LineSentenceIterator, SentenceIterator}
@@ -18,7 +18,7 @@ class WordEmbConf(arguments: Seq[String]) extends ScallopConf(arguments) {
   val outputFile  = opt[String](required = true, name = "output", descr = "file that will contain serialized model")
   val csvColumn   = opt[Int](required = false, name = "csv-column", descr = "index of csv column that contains sentence, starting with 1")
   val linesToTake = opt[Int](required = false, name = "lines", descr = "number of lines to read from source file, can be useful for testing")
-  val tempFile    = opt[Boolean](required = false, name = "temp-file", descr = "flag, whether to create temp file, with some preprocessing done")
+  val tempFile    = opt[Boolean](required = false, name = "preprocess", descr = "flag, whether to create temp file, with some preprocessing done")
 
   verify()
 }
@@ -34,7 +34,7 @@ object Word2VecEmbedding extends Loggable {
       // get the source file name.
       val sourceFile = if(conf.tempFile.getOrElse(false)) {
         logger.info("Preparing the temp file")
-        prepareTempFile(initialSourceFile, conf.csvColumn.toOption, conf.linesToTake.toOption)
+        preprocessFile(initialSourceFile, conf.csvColumn.toOption, conf.linesToTake.toOption)
       } else {
         new File(initialSourceFile)
       }
@@ -56,7 +56,7 @@ object Word2VecEmbedding extends Loggable {
     /*
       NGramTokenizerFactory chosen to detect short sentences 1-3 grams
      */
-    val tokenizerFactory: TokenizerFactory = new NGramTokenizerFactory(new DefaultTokenizerFactory, 1, 3)
+    val tokenizerFactory: TokenizerFactory = new NGramTokenizerFactory(new DefaultTokenizerFactory, 1, 2)
 
     /*
       CommonPreprocessor will apply the following regex to each token: [\d\.:,"'\(\)\[\]|/?!;]+
@@ -70,12 +70,19 @@ object Word2VecEmbedding extends Loggable {
     val vec = new Word2Vec.Builder()
       // remove words with low number of occurrences, usually the suggested value is within 1 - 100
       .minWordFrequency(25)
-      .iterations(1)
-      // we can effort bigger layer size because of large amount of training data
-      .layerSize(500)
+      // multiple iterations over batch size should increase the information learned
+      .iterations(3)
+      // it could be reasonable to increase number of epochs to increase accuracy
+      .epochs(1) // 1 is chosen for faster training
+      // we can afford bigger layer size because of large amount of training data
+      // usually it's recommended to pick layer size less than 1000
+      // looks like 500 is the most popular configuration
+      .layerSize(250) // 250 is chosen for faster training
+      // we pick batch size to speedup learning
+      .batchSize(25)
       .seed(42)
       // we may want to look at longer window than default 5
-      .useVariableWindow(5, 7, 9)
+      .useVariableWindow(5, 7)
       // Mikolov's approach with negative sampling outperforms standard approach without it,
       // based on this paper https://arxiv.org/pdf/1402.3722v1.pdf
       // so we pick positive double value to enable it
@@ -100,9 +107,9 @@ object Word2VecEmbedding extends Loggable {
     * Cleans the file and saves to temp file
     * @return temp file path
     */
-  private def prepareTempFile(inputFilePath: String, columnIndex: Option[Int], linesToTake: Option[Int]): File = {
+  private def preprocessFile(inputFilePath: String, columnIndex: Option[Int], linesToTake: Option[Int]): File = {
 
-    val parser = CSVParser.default
+    val parser = CSVPreprocessor.default
     val inputFile = new File(inputFilePath)
     val tempFileName = inputFile.getAbsolutePath.stripSuffix(inputFile.getName) + "temp_" + inputFile.getName
     val tempFile = new File(tempFileName)

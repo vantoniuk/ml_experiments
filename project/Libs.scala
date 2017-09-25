@@ -15,6 +15,8 @@ object Libs {
   val nd4jNative          = "org.nd4j"           %  "nd4j-native"                     % dl4jVer
   val nd4jNativePlatform  = "org.nd4j"           %  "nd4j-native-platform"            % dl4jVer
 
+  val playTest            = "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
+
   val logback             = "ch.qos.logback"     %  "logback-classic"                 % "1.1.7"
   val opencsv             = "net.sf.opencsv"     % "opencsv"                          % "2.3"
   val scallop             = "org.rogach"        %% "scallop"                          % "3.1.0"

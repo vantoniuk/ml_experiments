@@ -1,0 +1,38 @@
+@(similarWords: Option[controllers.SimilarWords])
+
+
+@renderForm(sentence: String, similarWords: List[String]) = {
+  <form method="get" action="/find_similar">
+    <div>
+      <label for="sentence">A word or short sentence</label>
+      <input type="text" value="@sentence" placeholder="Enter a word..." name="sentence" id="sentence" />
+    </div>
+    <div>
+      <label for="limit">Number of similar words</label>
+      <input type="number" value="10" name="limit" id="limit">
+    </div>
+    <p><input type="submit" value="Get Similar words"></p>
+
+    @if(similarWords.nonEmpty) {
+    <p><strong>Similar words:</strong></p>
+    <ul>
+      @for(word <- similarWords) {
+      <li>@word</li>
+      }
+    </ul>
+    }
+
+  </form>
+}
+
+@main("Word2Vec Demo") {
+
+  <h1>Enter a word or a short sentence to find similar words</h1>
+
+  @if(similarWords.isEmpty) {
+    @renderForm("", Nil)
+  } else {
+    @renderForm(similarWords.get.sentence, similarWords.get.similarWords)
+  }
+
+}
