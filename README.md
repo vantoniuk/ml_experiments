@@ -11,8 +11,9 @@ Parameters used for training chosen based on:
 ```
   new Word2Vec.Builder()
     .minWordFrequency(25)
-    .iterations(3)
+    .iterations(2)
     .epochs(1)
+    .layerSize(200)
     .batchSize(25)
     .seed(42)
     .useVariableWindow(5, 7)

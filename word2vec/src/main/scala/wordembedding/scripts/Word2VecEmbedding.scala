@@ -71,13 +71,13 @@ object Word2VecEmbedding extends Loggable {
       // remove words with low number of occurrences, usually the suggested value is within 1 - 100
       .minWordFrequency(25)
       // multiple iterations over batch size should increase the information learned
-      .iterations(3)
+      .iterations(2) // 2 is chosen for faster training
       // it could be reasonable to increase number of epochs to increase accuracy
       .epochs(1) // 1 is chosen for faster training
       // we can afford bigger layer size because of large amount of training data
       // usually it's recommended to pick layer size less than 1000
       // looks like 500 is the most popular configuration
-      .layerSize(250) // 250 is chosen for faster training
+      .layerSize(200) // 200 is chosen for faster training
       // we pick batch size to speedup learning
       .batchSize(25)
       .seed(42)
