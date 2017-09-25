@@ -2,6 +2,24 @@
 
 Simple scala project showcase of Word2Vec capabilities with web interface provided.
 
+Parameters used for training chosen based on:
+
+* Training time on local machine, hence some parameter values can be incresed for better accuracy
+* Inspired by these 2 papers [Word2Vec Explained](https://arxiv.org/pdf/1402.3722v1.pdf) and original Google paper [Distributed Representations of Words and Phrases and their Compositionality](https://arxiv.org/pdf/1310.4546.pdf)
+* Inferred reading deeplearning4j source code
+
+```
+  new Word2Vec.Builder()
+    .minWordFrequency(25)
+    .iterations(3)
+    .epochs(1)
+    .batchSize(25)
+    .seed(42)
+    .useVariableWindow(5, 7)
+    .negativeSample(0.1)
+    .sampling(0.01)
+```
+
 ### Train the model
 
 To train the model you need to run wordembedding.scripts.Word2VecEmbedding script.
