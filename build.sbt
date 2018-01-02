@@ -34,6 +34,9 @@ lazy val word2vec_web = project.in(file("word2vec_web"))
     guice
   ))
 
+lazy val recommender_poc = project.in(file("recommender_poc"))
+    .settings(name := "recommender_poc")
+    .settings(commonSettings:_*)
 
 lazy val commonSettings = Seq(
   version := "1.0",
